@@ -1,0 +1,21 @@
+{
+  "app\\page.tsx -> ../components/FloodLoopDashboard": {
+    "id": "app\\page.tsx -> ../components/FloodLoopDashboard",
+    "files": [
+      "static/chunks/_app-pages-browser_components_FloodLoopDashboard_tsx.js"
+    ]
+  },
+  "components\\FloodLoopDashboard.tsx -> leaflet": {
+    "id": "components\\FloodLoopDashboard.tsx -> leaflet",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_leaflet_dist_leaflet-src_js.js"
+    ]
+  },
+  "components\\FloodLoopDashboard.tsx -> leaflet/dist/leaflet.css": {
+    "id": "components\\FloodLoopDashboard.tsx -> leaflet/dist/leaflet.css",
+    "files": [
+      "static/css/_app-pages-browser_node_modules_leaflet_dist_leaflet_css.css",
+      "static/chunks/_app-pages-browser_node_modules_leaflet_dist_leaflet_css.js"
+    ]
+  }
+}

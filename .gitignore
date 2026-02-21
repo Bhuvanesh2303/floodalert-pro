@@ -1,0 +1,13 @@
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+.env
+floodloop.db
+
+# Node
+frontend/node_modules/
+
+# System
+.DS_Store
+Thumbs.db
