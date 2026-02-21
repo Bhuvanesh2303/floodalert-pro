@@ -10,4 +10,6 @@ frontend/node_modules/
 
 # System
 .DS_Store
-Thumbs.db
+Thumbs.dbnode_modules/ 
+frontend/.next/ 
+backend/venv/ 
