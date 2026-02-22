@@ -215,60 +215,170 @@ const CrossSectionChart = ({ points, onClose }: { points: CrossSectionPoint[]; o
 
 // ─── Time Slider ──────────────────────────────────────────────────────────────
 
-const TimeSlider = ({ frames, currentFrame, setCurrentFrame, playing, setPlaying }: { frames: FloodFrame[]; currentFrame: number; setCurrentFrame: (n: number) => void; playing: boolean; setPlaying: (b: boolean) => void; }) => {
-  const ivRef = useRef<any>(null);
-  useEffect(() => {
-    if (playing) { ivRef.current = setInterval(() => setCurrentFrame((prev: number) => { if (prev >= frames.length - 1) { setPlaying(false); return 0; } return prev + 1; }), 600); }
-    else clearInterval(ivRef.current);
-    return () => clearInterval(ivRef.current);
-  }, [playing, frames.length]);
+// ─── Time Slider ──────────────────────────────────────────────────────────────
+
+const TimeSlider = ({
+  frames,
+  currentFrame,
+  setCurrentFrame,
+  playing,
+  setPlaying,
+}: {
+  frames: FloodFrame[];
+  currentFrame: number;
+  setCurrentFrame: React.Dispatch<React.SetStateAction<number>>;
+  playing: boolean;
+  setPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const ivRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+useEffect(() => {
+  if (!playing) {
+    if (ivRef.current) {
+      clearInterval(ivRef.current);
+      ivRef.current = null;
+    }
+    return;
+  }
+
+  ivRef.current = setInterval(() => {
+    setCurrentFrame((prev) => {
+      if (prev >= frames.length - 1) {
+        setPlaying(false);
+        return 0;
+      }
+      return prev + 1;
+    });
+  }, 600);
+
+  return () => {
+    if (ivRef.current) {
+      clearInterval(ivRef.current);
+      ivRef.current = null;
+    }
+  };
+}, [playing, frames.length, setCurrentFrame, setPlaying]);
 
   if (!frames.length) return null;
+
   const frame = frames[currentFrame];
-  const lc = frame.score >= 65 ? "#ef4444" : frame.score >= 35 ? "#f59e0b" : "#22c55e";
+  const lc =
+    frame.score >= 65
+      ? "#ef4444"
+      : frame.score >= 35
+      ? "#f59e0b"
+      : "#22c55e";
 
   return (
-    <div style={{ background: "rgba(15,23,42,0.85)", border: "1px solid rgba(56,189,248,0.15)", backdropFilter: "blur(20px)", borderRadius: 16, padding: "20px 24px", animation: "fadeIn 0.5s" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap" as const, gap: 12 }}>
+    <div
+      style={{
+        background: "rgba(15,23,42,0.85)",
+        border: "1px solid rgba(56,189,248,0.15)",
+        backdropFilter: "blur(20px)",
+        borderRadius: 16,
+        padding: "20px 24px",
+        animation: "fadeIn 0.5s",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 20 }}>⏱</span>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 18, letterSpacing: "0.06em" }}>FLOOD EVOLUTION</div>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: "rgba(148,163,184,0.5)" }}>72-HOUR PROGRESSION MODEL · SCRUB OR PLAY</div>
+            <div
+              style={{
+                fontFamily: "'Bebas Neue',sans-serif",
+                fontSize: 18,
+                letterSpacing: "0.06em",
+              }}
+            >
+              FLOOD EVOLUTION
+            </div>
+            <div
+              style={{
+                fontFamily: "'Space Mono',monospace",
+                fontSize: 10,
+                color: "rgba(148,163,184,0.5)",
+              }}
+            >
+              72-HOUR PROGRESSION MODEL
+            </div>
           </div>
         </div>
+
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ padding: "4px 14px", borderRadius: 8, background: `${lc}22`, border: `1px solid ${lc}`, fontFamily: "'Space Mono',monospace", fontSize: 12, color: lc }}>{frame.label} · {frame.score}% risk</div>
-          <button onClick={() => setPlaying(!playing)} style={{ padding: "8px 18px", borderRadius: 8, background: playing?"rgba(239,68,68,0.12)":"rgba(56,189,248,0.12)", border: `1px solid ${playing?"#ef4444":"#38bdf8"}`, color: playing?"#f87171":"#38bdf8", fontFamily: "'Space Mono',monospace", fontSize: 11, cursor: "pointer", letterSpacing: "0.06em" }}>
+          <div
+            style={{
+              padding: "4px 14px",
+              borderRadius: 8,
+              background: `${lc}22`,
+              border: `1px solid ${lc}`,
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 12,
+              color: lc,
+            }}
+          >
+            {frame.label} · {frame.score}% risk
+          </div>
+
+          <button
+            onClick={() => setPlaying((p) => !p)}
+            style={{
+              padding: "8px 18px",
+              borderRadius: 8,
+              background: playing
+                ? "rgba(239,68,68,0.12)"
+                : "rgba(56,189,248,0.12)",
+              border: `1px solid ${
+                playing ? "#ef4444" : "#38bdf8"
+              }`,
+              color: playing ? "#f87171" : "#38bdf8",
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 11,
+              cursor: "pointer",
+              letterSpacing: "0.06em",
+            }}
+          >
             {playing ? "⏸ PAUSE" : "▶ PLAY"}
           </button>
         </div>
       </div>
-      <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 3, cursor: "pointer", marginBottom: 10 }}
-        onClick={e => { const r = e.currentTarget.getBoundingClientRect(); setCurrentFrame(Math.round(((e.clientX - r.left) / r.width) * (frames.length - 1))); }}>
-        <div style={{ height: "100%", width: `${(currentFrame / (frames.length - 1)) * 100}%`, background: `linear-gradient(90deg,#22c55e,${lc})`, borderRadius: 3, transition: "width 0.25s" }} />
-        <div style={{ position: "absolute", top: "50%", left: `${(currentFrame / (frames.length - 1)) * 100}%`, transform: "translate(-50%,-50%)", width: 16, height: 16, borderRadius: "50%", background: lc, border: "2px solid white", boxShadow: `0 0 8px ${lc}` }} />
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        {frames.filter((_,i) => i % 4 === 0).map((f, i) => (
-          <button key={i} onClick={() => setCurrentFrame(frames.indexOf(f))} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, color: frames.indexOf(f) === currentFrame ? "#38bdf8" : "rgba(148,163,184,0.4)", padding: 0 }}>{f.label}</button>
-        ))}
-      </div>
-      {/* Mini sparkline */}
-      <div style={{ height: 48, position: "relative" }}>
-        <svg viewBox={`0 0 600 48`} width="100%" height="48" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="evoG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={lc} stopOpacity="0.5" /><stop offset="100%" stopColor={lc} stopOpacity="0.05" /></linearGradient>
-          </defs>
-          {(() => {
-            const pts = frames.map((f, i) => `${(i/(frames.length-1))*600},${48-(f.score/100)*43}`);
-            return (<>
-              <path d={`M${pts.join(" L")} L600,48 L0,48 Z`} fill="url(#evoG)" />
-              <path d={`M${pts.join(" L")}`} fill="none" stroke={lc} strokeWidth="1.5" />
-              <line x1={(currentFrame/(frames.length-1))*600} y1="0" x2={(currentFrame/(frames.length-1))*600} y2="48" stroke="white" strokeWidth="1" strokeDasharray="3,2" opacity="0.4" />
-            </>);
-          })()}
-        </svg>
+
+      {/* Slider Bar */}
+      <div
+        style={{
+          position: "relative",
+          height: 6,
+          background: "rgba(255,255,255,0.06)",
+          borderRadius: 3,
+          cursor: "pointer",
+          marginBottom: 10,
+        }}
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          const percent = (e.clientX - r.left) / r.width;
+          setCurrentFrame(
+            Math.round(percent * (frames.length - 1))
+          );
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${(currentFrame / (frames.length - 1)) * 100}%`,
+            background: `linear-gradient(90deg,#22c55e,${lc})`,
+            borderRadius: 3,
+            transition: "width 0.25s",
+          }}
+        />
       </div>
     </div>
   );
@@ -365,7 +475,6 @@ const LeafletMap = ({ center, riskLevel, cityName, showPrecipLayer, mapMode, sho
     if (typeof window === "undefined") return;
     const init = async () => {
       const L = (await import("leaflet")).default;
-      await import("leaflet/dist/leaflet.css");
       if (!mapRef.current) return;
       if (!lMap.current) {
         lMap.current = L.map(mapRef.current, { center, zoom: 11, zoomControl: true, attributionControl: false });
@@ -435,7 +544,7 @@ export default function FloodLoopDashboard() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [crossSection, setCrossSection] = useState<CrossSectionPoint[] | null>(null);
   const [floodFrames, setFloodFrames] = useState<FloodFrame[]>([]);
-  const [currentFrame, setCurrentFrame] = useState(0);
+  const [currentFrame, setCurrentFrame] = useState<number>(0);
   const [playing, setPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState<"stats"|"history"|"scenario">("stats");
   const sseRef = useRef<EventSource | null>(null);
@@ -508,7 +617,9 @@ export default function FloodLoopDashboard() {
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 42, height: 42, borderRadius: 12, background: "linear-gradient(135deg,#1d4ed8,#0891b2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 0 24px rgba(29,78,216,0.5)" }}>🌊</div>
               <div>
-                <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(28px,4vw,42px)", letterSpacing: "0.06em", lineHeight: 1 }}>FLOOD<span style={{ color: "#38bdf8" }}>LOOP</span></h1>
+                <h1 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "clamp(28px,4vw,42px)", letterSpacing: "0.06em", lineHeight: 1 }}>
+  FLOODALERT<span style={{ color: "#38bdf8" }}> PRO</span>
+</h1>
                 <p style={{ fontSize: 11, color: "rgba(148,163,184,0.6)", fontFamily: "'Space Mono',monospace", letterSpacing: "0.12em" }}>REAL-TIME RISK MONITORING</p>
               </div>
             </div>
@@ -644,7 +755,7 @@ export default function FloodLoopDashboard() {
           )}
 
           <footer style={{ marginTop: 28, textAlign: "center" as const, fontFamily: "'Space Mono',monospace", fontSize: 10, color: "rgba(148,163,184,0.3)", letterSpacing: "0.08em" }}>
-            FLOODLOOP v2.0 · SATELLITE: ESRI · WEATHER: OWM · CLICK MAP FOR DEPTH PROFILE · ROUTES ARE ILLUSTRATIVE
+            FLOODALERT PRO v2.0 · SATELLITE: ESRI · WEATHER: OWM · CLICK MAP FOR DEPTH PROFILE · ROUTES ARE ILLUSTRATIVE
           </footer>
         </div>
       </div>

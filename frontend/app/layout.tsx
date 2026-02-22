@@ -1,7 +1,8 @@
+import "leaflet/dist/leaflet.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FloodLoop — Real-Time Flood Risk Dashboard",
+  title: "FloodAlert Pro — Real-Time Flood Risk Monitoring",
   description: "Monitor live weather conditions and flood risk probability for any city worldwide.",
 };
 
